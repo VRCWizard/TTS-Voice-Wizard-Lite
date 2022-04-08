@@ -1,5 +1,8 @@
 # TTS-Voice-Wizard-Lite
-This is an extremely dumbed down version of the STTTS app that uses windows voice recognition engine and TTS
+**This is an extremely dumbed down version of the STTTS app that uses windows Speech recognition engine and TTS, for the main version of the app go here https://github.com/VRCWizard/TTS-Voice-Wizard**
+Use TTS Voice Wizard's accessibily features to improve your VRChat experience (it works out of VRChat too!)
+* You can convert your Speech to Text and back to Speech through Windows Speech Recognition and TTS.<br />
+* You can send what you say as OSC messages to VRChat to be displayed on your avatar using KillFrenzyAvatarText!<br />
 ![Screenshot 2022-04-08 114323](https://user-images.githubusercontent.com/101527472/162485657-f80428d0-c212-4b99-b4a7-c2cf3ced0bd6.png)
 # Getting Started
 Download the latest version from releases and run the .exe file (recommended to use latest release, not pre-release) <br />
