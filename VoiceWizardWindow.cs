@@ -6,10 +6,9 @@ using SharpOSC;
 using System;
 using System.Speech.Recognition;//free Windows
 using System.Windows.Forms;
-using Vosk;
-using NAudio;
-using NAudio.Wave;
-using NAudio.Utils;
+
+
+
 using System.Speech;
 using System.Speech.Synthesis;
 
@@ -18,10 +17,9 @@ namespace TTSWizardFree
     public partial class VoiceWizardWindow : Form
     {
 
-        public static string YourSubscriptionKey = Settings1.Default.yourKey;
-        public static string YourServiceRegion = Settings1.Default.yourRegion;
+        
         public string dictationString = "";
-        public string activationWord = Settings1.Default.activationWord;
+       
         public int debugDelayValue = 250;// Recommended delay of 250ms 
         public int eraseDelay = 5000;
         int audioOutputIndex = -1;
@@ -37,19 +35,19 @@ namespace TTSWizardFree
         //  WaveFileWriter waveWriter;
         // private WaveFileWriter waveWriter;//opening memoryStream and write in dataavailable event
         //Stream memoryStream; //for save 
-        WaveFileWriter writer;
-        private MemoryStream mem;
-        public WaveInEvent waveInStream;
+      //  WaveFileWriter writer;
+       // private MemoryStream mem;
+       // public WaveInEvent waveInStream;
 
         //  static WaveFileWriter wri;
         //  static bool stopped = false;
-        NAudio.Wave.WaveIn sourceStream = null;
-        NAudio.Wave.DirectSoundOut waveOut = null;
-        NAudio.Wave.WaveFileWriter waveWriter = null;
-        Model model;
-        VoskRecognizer rec;
+      //  NAudio.Wave.WaveIn sourceStream = null;
+       // NAudio.Wave.DirectSoundOut waveOut = null;
+       //// NAudio.Wave.WaveFileWriter waveWriter = null;
+       // Model model;
+      //  VoskRecognizer rec;
 
-        WaveInEvent waveIn = new WaveInEvent();
+       // WaveInEvent waveIn = new WaveInEvent();
         SpeechSynthesizer synthesizer;
         
         //var synthesizer1 = new SpeechSynthesizer();
@@ -67,7 +65,7 @@ namespace TTSWizardFree
             Shift = 4,
             WinKey = 8
         }
-        private void WaveInOnDataAvailable(object? sender, WaveInEventArgs e)
+      /*  private void WaveInOnDataAvailable(object? sender, WaveInEventArgs e)
         {
             
             //synthesizer.SelectVoice("Microsoft Zira Desktop");
@@ -94,14 +92,19 @@ namespace TTSWizardFree
                             text = text.Remove(text.Length - 1);
                             text = text.Remove(text.Length - 1);
                             System.Diagnostics.Debug.WriteLine(text);
-                           // synthesizer.Speak(test);
+                          
                             var ot = new OutputText();
                             //Send Text to Vrchat
                             if (checkBox2.Checked == true)
                             {
                                 ot.outputLog(this, text);
                             }
-                            Task.Run(() => synthesizer.Speak(text));//new
+                            if(checkBox3.Checked == true)
+                            {
+                             Task.Run(() => synthesizer.Speak(text));//new
+
+                            }
+                            
                             if (checkBox1.Checked == true)
                             {
 
@@ -128,25 +131,25 @@ namespace TTSWizardFree
             {
                 System.Diagnostics.Debug.WriteLine("not working 2");
             }
-        }
+        } */
         public VoiceWizardWindow()
         {
 
 
             InitializeComponent();
-            for (int n = -1; n < WaveIn.DeviceCount; n++)
-            {
-                var caps = WaveIn.GetCapabilities(n);
-                System.Diagnostics.Debug.WriteLine($"{n}: {caps.ProductName}");
-            }
-            for (int n = -1; n < WaveOut.DeviceCount; n++)
-            {
-                var caps = WaveOut.GetCapabilities(n);
-                System.Diagnostics.Debug.WriteLine($"{n}: {caps.ProductName}");
-            }
+           // for (int n = -1; n < WaveIn.DeviceCount; n++)
+          //  {
+           //     var caps = WaveIn.GetCapabilities(n);
+           //     System.Diagnostics.Debug.WriteLine($"{n}: {caps.ProductName}");
+           // }
+          //  for (int n = -1; n < WaveOut.DeviceCount; n++)
+          //  {
+          //      var caps = WaveOut.GetCapabilities(n);
+          //      System.Diagnostics.Debug.WriteLine($"{n}: {caps.ProductName}");
+          //  }
             synthesizer = new SpeechSynthesizer();
-           // synthesizer = synthesizer;
-            //synthesizer.SetOutputToDefaultAudioDevice();
+            
+            synthesizer.SetOutputToDefaultAudioDevice();
             foreach (var voice in synthesizer.GetInstalledVoices())
              {
                  var info = voice.VoiceInfo;
@@ -162,11 +165,11 @@ namespace TTSWizardFree
             int id = 0;// The id of the hotkey. 
             RegisterHotKey(this.Handle, id, (int)KeyModifier.Control, Keys.G.GetHashCode());
             
-            waveIn.DataAvailable += WaveInOnDataAvailable;
+           // waveIn.DataAvailable += WaveInOnDataAvailable;
            // waveIn.StartRecording();
 
-            model = new Model("model");
-            rec = new VoskRecognizer(model, waveIn.WaveFormat.SampleRate);
+            //model = new Model("model");
+           // rec = new VoskRecognizer(model, waveIn.WaveFormat.SampleRate);
 
          
 
@@ -174,9 +177,35 @@ namespace TTSWizardFree
 
 
         }
-        static void recognizer_SpeechRecognized(object sender, SpeechRecognizedEventArgs e)
+        public void recognizer_SpeechRecognized(object sender, SpeechRecognizedEventArgs e)
         {
             System.Diagnostics.Debug.WriteLine("Recognized text: " + e.Result.Text);
+            string text = e.Result.Text.ToString();
+            var ot = new OutputText();
+            //Send Text to Vrchat
+            if (checkBox2.Checked == true)
+            {
+                ot.outputLog(this, text);
+
+            }
+            if (checkBox3.Checked == true)
+            {
+                Task.Run(() => synthesizer.Speak(text));//new
+
+            }
+            
+            if (checkBox1.Checked == true)
+            {
+
+
+
+                Task.Run(() => ot.outputVRChat(this, text)); //original
+                                                             // ot.outputVRChat(this, text);//new
+            }
+            //Send Text to TTS
+
+
+            // Task.Run(() => AudioSynthesis.SynthesizeAudioAsync(text, emotion, rate, pitch, volume, voice)); //original
         }
         protected override void WndProc(ref Message m)
         {
@@ -209,7 +238,12 @@ namespace TTSWizardFree
             {
                 ot.outputLog(this, text);
             }
-            Task.Run(() => synthesizer.Speak(text));//new
+            if (checkBox3.Checked == true)
+            {
+                Task.Run(() => synthesizer.Speak(text));//new
+
+            }
+           
             if (checkBox1.Checked == true)
             {
 
@@ -256,13 +290,16 @@ namespace TTSWizardFree
 
         public void logLine(string line)
         {
-            if (InvokeRequired)
+             if (InvokeRequired)
             {
-                this.Invoke(new Action<string>(AppendTextBox), new object[] { line });
+                this.Invoke(new Action<string>(logLine), new object[] { line }); // line in the main program to be fixed
                 return;
             }
-            richTextBox1.Select(0, 0);
-            richTextBox1.SelectedText = line + "\r\n";
+          //  this.Invoke((MethodInvoker)delegate ()
+          //  {
+               richTextBox1.Select(0, 0);
+               richTextBox1.SelectedText = line + "\r\n";
+           // }
         }
 
 
@@ -312,8 +349,7 @@ namespace TTSWizardFree
         {
             UnregisterHotKey(this.Handle, 0);
            
-            Settings1.Default.recognition = checkBox4.Checked;
-            Settings1.Default.Save();
+         
         }
 
         private void comboBoxVirtualOutput_SelectedIndexChanged(object sender, EventArgs e)
@@ -328,51 +364,14 @@ namespace TTSWizardFree
         private void Form1_Load(object sender, EventArgs e)
         {
 
-            checkBox4.Checked = Settings1.Default.recognition;
-            textBoxActivationWord.Text = Settings1.Default.activationWord;
-            activationWord = Settings1.Default.activationWord;
-            if (Settings1.Default.recognition == true)
-            {
-                var va = new VoiceActivation();
-
-                va.loadSpeechRecognition(this);
-                MessageBox.Show("STTTS Voice Activation Initiated");
-            }
-
-
-
-            YourSubscriptionKey = Settings1.Default.yourKey;
-            YourServiceRegion = Settings1.Default.yourRegion;
-
-  
-
-            
+ 
             comboBox2.SelectedIndex = 0;//voice
+            comboBox1.SelectedIndex = 1;//culture
 
 
         }
      
-
-
-
-        private void buttonActivationWord_Click(object sender, EventArgs e)
-        {
-            activationWord = textBoxActivationWord.Text.ToString();
-            Settings1.Default.activationWord = textBoxActivationWord.Text.ToString();
-            Settings1.Default.Save();
-        }
-
-        private void checkBox2_CheckedChanged(object sender, EventArgs e)
-        {
-
-        }
-
        
-
-        private void tabPage2_Click(object sender, EventArgs e)
-        {
-
-        }
 
         private void buttonErase_Click(object sender, EventArgs e)
         {
@@ -387,67 +386,81 @@ namespace TTSWizardFree
         }
         private void startListeningNow()
         {
-            using (recognizer = new SpeechRecognitionEngine(new System.Globalization.CultureInfo("en-US")))
+            string cultureHere = "en-US";
+            this.Invoke((MethodInvoker)delegate ()
             {
-                // Create and load a dictation grammar.  
-                recognizer.LoadGrammar(new DictationGrammar());
+                cultureHere= comboBox1.Text.ToString();
 
-                // Add a handler for the speech recognized event.  
-                recognizer.SpeechRecognized +=
-                  new EventHandler<SpeechRecognizedEventArgs>(recognizer_SpeechRecognized);
-
-                // Configure input to the speech recognizer.  
-                recognizer.SetInputToDefaultAudioDevice();
-
-                bool completed = false;
-
-                // Attach event handlers.
-                recognizer.RecognizeCompleted += (o, e) =>
+            });
+            try
+            {
+                using (recognizer = new SpeechRecognitionEngine(new System.Globalization.CultureInfo(cultureHere)))
                 {
-                    if (e.Error != null)
+                    // Create and load a dictation grammar.  
+                    recognizer.LoadGrammar(new DictationGrammar());
+
+                    // Add a handler for the speech recognized event.  
+                    recognizer.SpeechRecognized +=
+                      new EventHandler<SpeechRecognizedEventArgs>(recognizer_SpeechRecognized);
+
+                    // Configure input to the speech recognizer.  
+                    recognizer.SetInputToDefaultAudioDevice();
+
+                    bool completed = false;
+
+                    // Attach event handlers.
+                    recognizer.RecognizeCompleted += (o, e) =>
                     {
-                        System.Diagnostics.Debug.WriteLine("Error occurred during recognition: {0}", e.Error);
-                    }
-                    else if (e.InitialSilenceTimeout)
+                        if (e.Error != null)
+                        {
+                            System.Diagnostics.Debug.WriteLine("Error occurred during recognition: {0}", e.Error);
+                        }
+                        else if (e.InitialSilenceTimeout)
+                        {
+                            System.Diagnostics.Debug.WriteLine("Detected silence");
+                        }
+                        else if (e.BabbleTimeout)
+                        {
+                            System.Diagnostics.Debug.WriteLine("Detected babbling");
+                        }
+                        else if (e.InputStreamEnded)
+                        {
+                            System.Diagnostics.Debug.WriteLine("Input stream ended early");
+                        }
+                        else if (e.Result != null)
+                        {
+                            System.Diagnostics.Debug.WriteLine("Grammar = {0}; Text = {1}; Confidence = {2}", e.Result.Grammar.Name, e.Result.Text, e.Result.Confidence);
+                        }
+                        else
+                        {
+                            System.Diagnostics.Debug.WriteLine("No result");
+                        }
+
+                        completed = true;
+                    };
+                    // Start asynchronous, continuous speech recognition.  
+                    recognizer.RecognizeAsync(RecognizeMode.Multiple);
+
+
+                    while (!completed)
                     {
-                        System.Diagnostics.Debug.WriteLine("Detected silence");
-                    }
-                    else if (e.BabbleTimeout)
-                    {
-                        System.Diagnostics.Debug.WriteLine("Detected babbling");
-                    }
-                    else if (e.InputStreamEnded)
-                    {
-                        System.Diagnostics.Debug.WriteLine("Input stream ended early");
-                    }
-                    else if (e.Result != null)
-                    {
-                        System.Diagnostics.Debug.WriteLine("Grammar = {0}; Text = {1}; Confidence = {2}", e.Result.Grammar.Name, e.Result.Text, e.Result.Confidence);
-                    }
-                    else
-                    {
-                        System.Diagnostics.Debug.WriteLine("No result");
+                        if (_userRequestedAbort)
+                        {
+                            recognizer.RecognizeAsyncCancel();
+                            break;
+                        }
+
+                        Thread.Sleep(333);
                     }
 
-                    completed = true;
-                };
-                // Start asynchronous, continuous speech recognition.  
-                recognizer.RecognizeAsync(RecognizeMode.Multiple);
+                    Console.WriteLine("Done.");
 
-
-                while (!completed)
-                {
-                    if (_userRequestedAbort)
-                    {
-                        recognizer.RecognizeAsyncCancel();
-                        break;
-                    }
-
-                    Thread.Sleep(333);
                 }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("A speech recognition engine that supports that language-country code must be installed");
 
-                Console.WriteLine("Done.");
-  
             }
 
         }
@@ -479,72 +492,10 @@ namespace TTSWizardFree
 
         }
 
-        private void label4_Click(object sender, EventArgs e)
-        {
 
-        }
+      
 
-        private void label6_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label5_Click(object sender, EventArgs e)
-        {
-
-        }
-        public static void DemoBytes(Model model)
-        {
-            // Demo byte buffer
-            VoskRecognizer rec = new VoskRecognizer(model, 16000.0f);
-            rec.SetMaxAlternatives(0);
-            rec.SetWords(true);
-            using (Stream source = File.OpenRead("test.wav"))
-            {
-                byte[] buffer = new byte[4096];
-                int bytesRead;
-                while ((bytesRead = source.Read(buffer, 0, buffer.Length)) > 0)
-                {
-                    if (rec.AcceptWaveform(buffer, bytesRead))
-                    {
-                        System.Diagnostics.Debug.WriteLine(rec.Result());
-                    }
-                    else
-                    {
-                        System.Diagnostics.Debug.WriteLine(rec.PartialResult());
-                    }
-                }
-            }
-            Console.WriteLine(rec.FinalResult());
-        }
-
-        public static void DemoFloats(Model model)
-        {
-            // Demo float array
-            VoskRecognizer rec = new VoskRecognizer(model, 16000.0f);
-            using (Stream source = File.OpenRead("test.wav"))
-            {
-                byte[] buffer = new byte[4096];
-                int bytesRead;
-                while ((bytesRead = source.Read(buffer, 0, buffer.Length)) > 0)
-                {
-                    float[] fbuffer = new float[bytesRead / 2];
-                    for (int i = 0, n = 0; i < fbuffer.Length; i++, n += 2)
-                    {
-                        fbuffer[i] = BitConverter.ToInt16(buffer, n);
-                    }
-                    if (rec.AcceptWaveform(fbuffer, fbuffer.Length))
-                    {
-                        System.Diagnostics.Debug.WriteLine(rec.Result());
-                    }
-                    else
-                    {
-                        System.Diagnostics.Debug.WriteLine(rec.PartialResult());
-                    }
-                }
-            }
-            Console.WriteLine(rec.FinalResult());
-        }
+     
 
         private void comboBox2_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -557,6 +508,11 @@ namespace TTSWizardFree
         {
             ClearTextBoxTTS();
 
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            synthesizer.SetOutputToDefaultAudioDevice();
         }
     }
 }
