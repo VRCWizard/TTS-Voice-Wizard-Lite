@@ -1,6 +1,6 @@
 # TTS-Voice-Wizard-Lite
 [![Discord](https://img.shields.io/discord/681732152517591048?label=Discord)](https://discord.gg/YjgR9SWPnW) 
-![downloads](https://img.shields.io/github/downloads/VRCWizard/TTS-Voice-Wizard-Lite/total) <br />
+![downloads](https://img.shields.io/github/downloads/VRCWizard/TTS-Voice-Wizard-Lite/total?label=Downloads) <br />
 **This is an extremely dumbed down version of the STTTS app that uses Windows Speech Recognition engine and TTS instead of Microsoft Azure's, for the main version of the app go here https://github.com/VRCWizard/TTS-Voice-Wizard** <br />
 Use TTS Voice Wizard's accessibily features to improve your VRChat experience (it works out of VRChat too!)
 * You can convert your Speech to Text and back to Speech through Windows Speech Recognition and TTS.<br />
